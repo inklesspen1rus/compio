@@ -37,6 +37,7 @@ cfg-if = { workspace = true }
 crossbeam-channel = { workspace = true }
 futures-util = { workspace = true }
 socket2 = { workspace = true, features = ["all"] }
+memmap2 = "0.9.8"
 
 # Windows specific dependencies
 [target.'cfg(windows)'.dependencies]

@@ -12,12 +12,14 @@ use std::{
 use io_uring::cqueue::buffer_select;
 use io_uring_buf_ring::IoUringBufRing;
 
+use crate::mempage::MemoryPage;
+
 /// Buffer pool
 ///
 /// A buffer pool to allow user no need to specify a specific buffer to do the
 /// IO operation
 pub struct BufferPool {
-    buf_ring: IoUringBufRing<Vec<u8>>,
+    buf_ring: IoUringBufRing<MemoryPage>,
 }
 
 impl Debug for BufferPool {
@@ -27,7 +29,7 @@ impl Debug for BufferPool {
 }
 
 impl BufferPool {
-    pub(crate) fn new(buf_ring: IoUringBufRing<Vec<u8>>) -> Self {
+    pub(crate) fn new(buf_ring: IoUringBufRing<MemoryPage>) -> Self {
         Self { buf_ring }
     }
 
@@ -35,7 +37,7 @@ impl BufferPool {
         self.buf_ring.buffer_group()
     }
 
-    pub(crate) fn into_inner(self) -> IoUringBufRing<Vec<u8>> {
+    pub(crate) fn into_inner(self) -> IoUringBufRing<MemoryPage> {
         self.buf_ring
     }
 
@@ -73,7 +75,7 @@ impl BufferPool {
 ///
 /// When IO operation finish, user will obtain a `BorrowedBuffer` to access the
 /// filled data
-pub struct BorrowedBuffer<'a>(io_uring_buf_ring::BorrowedBuffer<'a, Vec<u8>>);
+pub struct BorrowedBuffer<'a>(io_uring_buf_ring::BorrowedBuffer<'a, MemoryPage>);
 
 impl Debug for BorrowedBuffer<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

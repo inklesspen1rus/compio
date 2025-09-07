@@ -27,7 +27,7 @@ use io_uring::{
 };
 use slab::Slab;
 
-use crate::{AsyncifyPool, BufferPool, DriverType, Entry, Key, ProactorBuilder, syscall};
+use crate::{mempage::MemoryPage, syscall, AsyncifyPool, BufferPool, DriverType, Entry, Key, ProactorBuilder};
 
 pub(crate) mod op;
 
@@ -337,12 +337,14 @@ impl Driver {
             ));
         }
 
-        let buf_ring = io_uring_buf_ring::IoUringBufRing::new(
-            &self.inner,
-            buffer_len,
-            buffer_group as _,
-            buffer_size,
-        )?;
+        // let buf_ring = io_uring_buf_ring::IoUringBufRing::new(
+        //     &self.inner,
+        //     buffer_len,
+        //     buffer_group as _,
+        //     buffer_size,
+        // )?;
+
+        let buf_ring = io_uring_buf_ring::IoUringBufRing::new_with_buffers(&self.inner, (0..buffer_len).into_iter().map(|_| MemoryPage::new(buffer_size).unwrap()), buffer_group as _)?;
 
         #[cfg(fusion)]
         {
